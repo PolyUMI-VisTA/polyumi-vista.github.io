@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PolyUMI: Accessible Visual–Tactile–Audio Data Collection for Object Inference and Manipulation</title>
+<meta name="description" content="PolyUMI is an open-source wireless handheld gripper that records synchronized wrist vision, optical tactile images and contact audio, and shares the same sensing finger with the robot end-effector. VisTA is its token-level multimodal policy.">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="PolyUMI: Accessible Visual–Tactile–Audio Data Collection">
+<meta property="og:description" content="An open-source wireless handheld gripper for synchronized vision, touch and contact audio — with the same sensing finger on the robot.">
+<meta property="og:image" content="assets/hero.jpg">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="assets/polyumi-logo.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#ffffff;
+  --tint:#ffffff;      /* page is flat white; bands are separated by rules only */
+  --card:#ffffff;
+  --ink:#1b1430;
+  --ink-soft:#4a4166;
+  --muted:#756d8c;
+  --rule:#e6e2ee;
+  --accent:#C23A7C;
+  --accent-soft:#fbeaf2;
+  --vision:#4457d6;
+  --tactile:#c94fac;
+  --audio:#e06a12;
+
+  --sans:"IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --wrap:1120px;
+  --col:720px;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth; scroll-padding-top:74px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+
+img,video{max-width:100%; height:auto; display:block}
+a{color:var(--accent); text-decoration:none; text-underline-offset:3px; text-decoration-thickness:1px}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2.5px solid var(--accent); outline-offset:3px; border-radius:2px}
+
+.wrap{width:100%; max-width:var(--wrap); margin:0 auto; padding:0 24px}
+.wrap-wide{width:100%; max-width:1340px; margin:0 auto; padding:0 24px}
+.col{max-width:var(--col)}
+
+/* the project's three modality colours, used as a hairline accent */
+.accent-rule{height:4px; width:100%;
+  background:linear-gradient(90deg,
+    var(--vision) 0%, var(--vision) 18%,
+    var(--tactile) 46%, var(--tactile) 54%,
+    var(--audio) 82%, var(--audio) 100%);
+  background:linear-gradient(90deg in oklab,
+    var(--vision) 0%, var(--vision) 18%,
+    var(--tactile) 46%, var(--tactile) 54%,
+    var(--audio) 82%, var(--audio) 100%);
+}
+.accent-rule.bottom{height:14px}
+
+/* ---------- sticky bar ---------- */
+.bar{
+  position:sticky; top:0; z-index:50;
+  background:rgba(255,255,255,.9);
+  backdrop-filter:saturate(180%) blur(12px);
+  border-bottom:1px solid var(--rule);
+}
+.bar-in{display:flex; align-items:center; gap:20px; height:56px}
+.bar-name{display:flex; align-items:center; gap:9px; font-weight:700; letter-spacing:-.01em; margin-right:auto}
+.bar-name img{height:24px; width:auto}
+.bar a.navlink{color:var(--ink-soft); font-size:14.5px; font-weight:500}
+.bar a.navlink:hover{color:var(--accent); text-decoration:none}
+.bar-in{gap:20px}
+@media (max-width:1060px){.bar .navlink.exp{display:none}}
+@media (max-width:760px){.bar .navlink.opt{display:none}}
+
+/* ---------- header ---------- */
+header.head{padding:64px 0 40px; text-align:center}
+/* TITLE + LOGO
+   On wide screens the title block stays optically centred on the page and the
+   logo is parked just outside its right edge, matching the full height of the
+   name plus the subtitle. Below 1180px the logo drops to a centred row above
+   the title at a fixed --mark-h, which avoids it colliding with the text.
+   --mark-gap is the space between logo and title. */
+.title-wrap{
+  --mark-h:96px;          /* only used on narrow screens */
+  --mark-gap:34px;
+  position:relative; display:inline-block; text-align:center;
+  max-width:900px; margin:0 auto 34px;
+}
+.title-wrap .sub{margin-bottom:0}
+.mark{height:var(--mark-h); width:auto; display:block}
+@media (min-width:1181px){
+  .title-wrap .mark{position:absolute; left:100%; top:0;
+    height:100%; margin-left:var(--mark-gap)}
+}
+@media (max-width:1180px){
+  .title-wrap .mark{margin:0 auto 22px}
+}
+
+h1.name{
+  font-size:clamp(30px,4.6vw,46px);
+  line-height:1; letter-spacing:-.03em; font-weight:700;
+  margin:0 0 14px;
+}
+.sub{
+  font-size:clamp(24px,3.6vw,40px); line-height:1.16; font-weight:600;
+  letter-spacing:-.024em; color:var(--ink);
+  max-width:900px; margin:0 auto 34px; text-wrap:balance;
+}
+.authors{max-width:880px; margin:0 auto 14px; font-size:17px; line-height:1.8}
+.authors sup{font-size:11.5px; color:var(--muted); font-weight:600}
+.authors sup .eq{font-weight:700; font-size:14px; color:var(--ink-soft)}
+.authors a{color:var(--ink); text-decoration:underline; text-decoration-color:#c8c0d8}
+.authors a:hover{color:var(--accent); text-decoration-color:currentColor}
+.affil{max-width:760px; margin:0 auto; font-size:14.5px; color:var(--muted); line-height:1.75}
+.affil sup{font-weight:600}
+
+.links{display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin:34px 0 0}
+.btn{
+  display:inline-flex; align-items:center; gap:9px;
+  padding:11px 20px; border-radius:999px;
+  background:var(--ink); color:#fff; font-size:15.5px; font-weight:500;
+  border:1px solid var(--ink); transition:background .15s ease, color .15s ease;
+}
+.btn:hover{background:var(--accent); border-color:var(--accent); text-decoration:none}
+.btn.ghost{background:transparent; color:var(--ink); border-color:#c8c0d8}
+.btn.ghost:hover{background:var(--ink); color:#fff; border-color:var(--ink)}
+.btn svg{width:17px; height:17px; flex:none; fill:currentColor}
+.btn[aria-disabled="true"]{opacity:.45; pointer-events:none}
+.pending{font-size:13.5px; color:var(--muted); margin:16px 0 0}
+
+/* ---------- hero ---------- */
+/* HERO SIZE — tune here.
+   --hero-max-w  how wide the image is allowed to get (lower = smaller hero).
+                 Try 760px for a compact hero, 1100px for a dominant one.
+   --hero-pad    breathing room above/below inside the white band.
+   The image never exceeds the viewport width, so this only takes effect on
+   screens wider than --hero-max-w. */
+.hero{
+  --hero-max-w:880px;
+  --hero-pad:44px;
+  margin:56px 0 0; background:var(--tint);
+  border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+  padding:var(--hero-pad) 24px;
+}
+.hero img{width:100%; max-width:var(--hero-max-w); margin:0 auto}
+@media (max-width:640px){.hero{--hero-pad:24px}}
+
+/* ---------- figures ---------- */
+
+figure{margin:0}
+figcaption{
+  font-size:14.5px; line-height:1.6; color:var(--muted);
+  max-width:820px; margin:16px auto 0; text-align:center;
+}
+figcaption b{color:var(--ink-soft); font-weight:600}
+.fig-card{
+  background:var(--tint); border:1px solid var(--rule); border-radius:10px;
+  padding:22px; 
+}
+.fig-card img{margin:0 auto}
+.fig-card video{width:100%; display:block; border-radius:6px; background:#0f0a1c}
+.fig-card figcaption{text-align:left; margin-left:0; margin-right:0; max-width:none}
+
+/* ---------- sections ---------- */
+section{padding:72px 0}
+section + section{border-top:1px solid var(--rule)}
+h2{
+  font-size:clamp(28px,4.2vw,40px); line-height:1.1; letter-spacing:-.028em;
+  font-weight:700; margin:0 0 8px;
+}
+h3{font-size:22px; line-height:1.25; letter-spacing:-.018em; font-weight:600; margin:0 0 10px}
+.lede{font-size:19px; line-height:1.6; color:var(--ink-soft); margin:0 0 34px; max-width:var(--col)}
+p{margin:0 0 18px; max-width:var(--col)}
+.sec-head{margin-bottom:38px}
+
+/* ---------- collapsible abstract ---------- */
+details.abstract{border-top:1px solid var(--rule); border-bottom:1px solid var(--rule)}
+details.abstract summary{
+  list-style:none; cursor:pointer; padding:22px 0;
+  display:flex; align-items:center; gap:14px;
+  font-size:clamp(24px,3.4vw,32px); line-height:1.1;
+  letter-spacing:-.025em; font-weight:700;
+}
+details.abstract summary::-webkit-details-marker{display:none}
+details.abstract summary::after{
+  content:""; width:12px; height:12px; margin-left:auto;
+  border-right:2.5px solid var(--muted); border-bottom:2.5px solid var(--muted);
+  transform:rotate(45deg) translate(-3px,-3px);
+  transition:transform .18s ease;
+}
+details.abstract[open] summary::after{transform:rotate(225deg) translate(-3px,-3px)}
+details.abstract summary:hover{color:var(--accent)}
+details.abstract .body{padding:4px 0 28px}
+details.abstract .body p:last-child{margin-bottom:0}
+
+/* ---------- modality chips ---------- */
+.chips{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 16px; padding:0; list-style:none}
+.chip{
+  display:inline-flex; align-items:center; gap:7px;
+  font-size:13.5px; font-weight:500; color:var(--ink-soft);
+  border:1px solid var(--rule); background:var(--tint);
+  padding:4px 12px 4px 10px; border-radius:999px;
+}
+.dot{width:9px; height:9px; border-radius:50%; flex:none}
+.d-v{background:var(--vision)} .d-t{background:var(--tactile)} .d-a{background:var(--audio)}
+
+/* ---------- video ---------- */
+.video-shell{
+  background:#0f0a1c; border-radius:12px; overflow:hidden;
+  border:1px solid #2a2140;
+}
+.video-shell video{width:100%; display:block; background:#0f0a1c}
+
+/* ---------- key facts ---------- */
+.facts{
+  display:grid; gap:0; margin:0; padding:0; list-style:none;
+  grid-template-columns:repeat(3,1fr);
+  border:1px solid var(--rule); border-radius:10px; overflow:hidden; background:var(--tint);
+}
+/* one per row, for the column beside the finger-transfer video */
+.facts.stacked{grid-template-columns:1fr}
+.facts.stacked li{border-right:0; border-bottom:1px solid var(--rule)}
+.facts.stacked li:last-child{border-bottom:0}
+.facts li{padding:22px 24px; border-right:1px solid var(--rule)}
+.facts li:last-child{border-right:0}
+.facts .num{font-family:var(--mono); font-size:30px; font-weight:500; letter-spacing:-.02em; display:block; margin-bottom:4px}
+.facts .lbl{font-size:14.5px; color:var(--muted); line-height:1.45}
+@media (max-width:760px){
+  .facts{grid-template-columns:1fr}
+  .facts li{border-right:0; border-bottom:1px solid var(--rule)}
+  .facts li:last-child{border-bottom:0}
+}
+
+/* ---------- tables ---------- */
+.tbl-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; border:1px solid var(--rule); border-radius:10px; background:var(--tint)}
+table{border-collapse:collapse; width:100%; font-size:15px; min-width:520px}
+caption{caption-side:bottom; text-align:left; font-size:14px; color:var(--muted); padding:14px 18px 2px; line-height:1.6}
+th,td{padding:11px 16px; text-align:left; border-bottom:1px solid var(--rule)}
+thead th{font-size:13.5px; font-weight:600; color:var(--muted); background:#fff; white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+tr.ours{background:var(--accent-soft)}
+tr.ours td{font-weight:600}
+.yes{color:#1c7a4a; font-weight:600}
+.no{color:#b9b2c9}
+.tbl-note{font-size:13.5px; color:var(--muted); margin-top:10px}
+
+/* denser variant, used for the long systems-comparison table */
+table.compact{font-size:14px}
+table.compact th,table.compact td{padding:6px 14px}
+table.compact thead th{font-size:12.5px}
+
+/* ---------- result blocks ---------- */
+.result{padding:0 0 8px}
+.result + .result{margin-top:56px; padding-top:56px; border-top:1px solid var(--rule)}
+.split{display:grid; grid-template-columns:1fr 1fr; gap:28px; align-items:start; margin-top:26px}
+.split-wide{grid-template-columns:1.4fr 1fr}
+.split-narrow{grid-template-columns:.85fr 1.15fr}
+@media (max-width:860px){.split,.split-wide,.split-narrow{grid-template-columns:1fr}}
+.stack{display:flex; flex-direction:column; gap:24px}
+/* SHAPE RECOGNITION — the tactile strip and the confusion matrix have very
+   different aspect ratios, so both are drawn at a fixed height and centred,
+   which levels the two cards. Change --shape-h to scale them together. */
+.shape-pair{--shape-h:250px}
+.shape-pair img{height:var(--shape-h); width:100%; object-fit:contain; object-position:center}
+@media (max-width:860px){.shape-pair{--shape-h:200px}}
+
+/* HEIGHT-CAPPED VIDEO — for clips that would otherwise run very tall at full
+   column width. Set the cap per figure with style="--cap:520px". */
+figure.cap-h video{max-height:var(--cap,480px); width:auto; max-width:100%; margin:0 auto}
+
+/* FINGER TRANSFER PAIR — portrait clip beside the key facts. --transfer-h
+   caps the player height; the facts are centred against it. */
+.transfer-pair{--transfer-h:430px; grid-template-columns:0.72fr 1.28fr; align-items:center}
+.transfer-pair video{max-height:var(--transfer-h); width:auto; max-width:100%; margin:0 auto}
+@media (max-width:860px){.transfer-pair{grid-template-columns:1fr}
+  .transfer-pair{--transfer-h:360px}}
+
+/* ROLLOUT VIDEO PAIR — see the comment in the markup. */
+.rollout-pair{--roll-ratio:2.3fr 1fr; grid-template-columns:var(--roll-ratio); gap:22px}
+.rollout-pair .fig-card{padding:14px}
+@media (max-width:860px){.rollout-pair{grid-template-columns:1fr}
+  .rollout-pair video{max-width:440px; margin:0 auto}}
+
+.headline-stat{
+  font-family:var(--mono); font-size:19px; font-weight:500; color:var(--ink);
+  margin:0 0 14px;
+}
+
+
+/* ---------- bibtex ---------- */
+.bib-head{display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:12px}
+#copy{
+  font:inherit; font-size:14px; font-weight:500; cursor:pointer;
+  background:var(--tint); color:var(--ink); border:1px solid #c8c0d8;
+  padding:7px 16px; border-radius:999px;
+}
+#copy:hover{background:var(--ink); color:#fff; border-color:var(--ink)}
+pre{
+  margin:0; padding:22px; overflow-x:auto;
+  background:var(--tint); border:1px solid var(--rule); border-radius:10px;
+  font-family:var(--mono); font-size:13.5px; line-height:1.7; color:var(--ink-soft);
+  tab-size:2;
+}
+
+/* ---------- back to top ---------- */
+.totop{text-align:center; padding:0 0 64px}
+.totop a{
+  display:inline-flex; align-items:center; gap:8px;
+  font-size:15px; font-weight:500; color:var(--ink);
+  border:1px solid #c8c0d8; border-radius:999px; padding:9px 20px;
+}
+.totop a:hover{background:var(--ink); color:#fff; border-color:var(--ink); text-decoration:none}
+
+/* ---------- footer ---------- */
+footer{padding:40px 0 48px; border-top:1px solid var(--rule); background:var(--tint)}
+footer p{font-size:14.5px; color:var(--muted); max-width:760px}
+footer h3{font-size:16px; margin-bottom:8px}
+.foot-grid{display:grid; grid-template-columns:1fr auto; gap:56px; align-items:center}
+.foot-mark{justify-self:end}
+.foot-mark img{height:230px; width:auto}
+@media (max-width:760px){
+  .foot-grid{grid-template-columns:1fr; gap:34px}
+  .foot-mark{justify-self:center}
+  .foot-mark img{height:150px}
+}
+</style>
+</head>
+
+<body id="top">
+
+<div class="accent-rule" aria-hidden="true"></div>
+
+<div class="bar">
+  <div class="wrap bar-in">
+    <span class="bar-name">PolyUMI<img src="assets/polyumi-logo.png" alt="" width="582" height="710"></span>
+    <a class="navlink opt" href="#video">Video</a>
+    <a class="navlink opt" href="#system">System</a>
+    <a class="navlink opt" href="#vista">VisTA</a>
+    <a class="navlink exp" href="#shape-recognition">Shape Recognition</a>
+    <a class="navlink exp" href="#object-in-box">Object-in-Box</a>
+    <a class="navlink exp" href="#manipulation">Manipulation</a>
+    <a class="navlink" href="https://github.com/polyumi/PolyUMI-platform">Code</a>
+    <a class="navlink" href="mailto:rickmer.krohn@tu-darmstadt.de">Contact</a>
+  </div>
+</div>
+
+<header class="head">
+  <div class="wrap">
+    <div class="title-wrap">
+      <img class="mark" src="assets/polyumi-logo.png" alt="PolyUMI logo" width="582" height="710">
+      <h1 class="name">PolyUMI</h1>
+      <p class="sub">Accessible Visual–Tactile–Audio Data Collection for Object Inference and Manipulation</p>
+    </div>
+
+    <p class="authors">
+      <a href="https://cwoodhayes.github.io">Conor Wood</a><sup><span class="eq">*</span>,1</sup>,
+      <a href="https://rickmerkrohn.github.io">Rickmer Krohn</a><sup><span class="eq">*</span>,2,3,4</sup>,
+      <a href="https://www.linkedin.com/in/aravind-ramaswami-a52656220">Aravind Ramaswami</a><sup>1</sup>,
+      <a href="https://www.linkedin.com/in/anunth-ramaswami-81506926b">Anunth Ramaswami</a><sup>1</sup>,<br>
+      <a href="https://nilsdengler.github.io">Nils Dengler</a><sup>2,3,4</sup>,
+      <a href="https://www.mccormick.northwestern.edu/research-faculty/directory/profiles/lynch-kevin.html">Kevin M. Lynch</a><sup>1</sup>,
+      <a href="https://robotics.northwestern.edu/people/profiles/faculty/colgate-edward.html">J. Edward Colgate</a><sup>1</sup>,
+      <a href="https://pearl-lab.com/people/georgia-chalvatzaki/">Georgia Chalvatzaki</a><sup>2,3,4</sup>,
+      <a href="https://robotics.northwestern.edu/people/profiles/faculty/elwin-matt.html">Matthew L. Elwin</a><sup>1</sup>
+    </p>
+    <p class="affil">
+      <sup>*</sup>Equal contribution &nbsp;·&nbsp;
+      <sup>1</sup>Center for Robotics and Biosystems, Northwestern University<br>
+      <sup>2</sup>Interactive Robot Perception &amp; Learning (PEARL) Lab, TU Darmstadt &nbsp;·&nbsp;
+      <sup>3</sup>Hessian.AI &nbsp;·&nbsp;
+      <sup>4</sup>Robotics Institute Germany
+    </p>
+
+    <nav class="links" aria-label="Project links">
+      <a class="btn" href="assets/polyumi-paper.pdf">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6V2zm8 1.5V8h4.5L14 3.5zM8 11h8v1.6H8V11zm0 3.4h8V16H8v-1.6zm0 3.4h5.5v1.6H8v-1.6z"/></svg>
+        Manuscript
+      </a>
+
+      <!-- ARXIV: replace href="#" with the abstract URL and delete
+           aria-disabled="true" (plus the "arXiv link goes live" line below). -->
+      <a class="btn" href="#" aria-disabled="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6V2zm8 1.5V8h4.5L14 3.5zM8 12h8v1.6H8V12zm0 3.4h8V17H8v-1.6z"/></svg>
+        arXiv
+      </a>
+
+      <!-- REPOSITORIES: one button per repo. To add another, copy a whole
+           <a class="btn"> … </a> block below, change the href and the label
+           (e.g. "Hardware", "Policy code", "Dataset"). The <svg> is the GitHub
+           mark; leave it as is. The row wraps on its own, so any number is fine
+           — beyond about four, consider shortening the labels. -->
+      <a class="btn" href="https://github.com/polyumi/PolyUMI-platform">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.7.5.7 5.6.7 11.9c0 5 3.3 9.3 7.8 10.8.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.2-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.9 1.2 1.9 1.2 3.2 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .4.2.7.8.6a11.4 11.4 0 0 0 7.8-10.8C23.3 5.6 18.3.5 12 .5z"/></svg>
+        Hardware &amp; code
+      </a>
+
+      <a class="btn ghost" href="#video">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7L8 5z"/></svg>
+        Video
+      </a>
+      <a class="btn ghost" href="#bibtex">BibTeX</a>
+    </nav>
+    <p class="pending">The arXiv link goes live with the preprint.</p>
+
+  </div>
+</header>
+
+<div class="hero">
+  <img src="assets/hero.jpg" alt="Left: the three sensor streams — a fisheye wrist view of a lightbulb on a workbench, an iridescent tactile image of the contact surface, and an audio spectrogram with contact spikes. Right: the same sensing finger on the robot end-effector indoors and on the handheld gripper outdoors." width="2200" height="1546">
+</div>
+<div class="wrap">
+  <figcaption style="margin-top:18px"><b>PolyUMI connects wireless demonstration collection to robot policy execution</b> through a shared multimodal sensing finger. Wrist vision, optical tactile images and contact audio give complementary observations for learning contact-rich manipulation.</figcaption>
+</div>
+
+<section id="video">
+  <div class="wrap">
+    <div class="video-shell">
+      <video controls preload="metadata" poster="assets/video-poster.jpg" playsinline>
+        <source src="assets/polyumi-overview.mp4" type="video/mp4">
+        Your browser can't play this video. <a href="assets/polyumi-overview.mp4">Download it instead</a>.
+      </video>
+    </div>
+  </div>
+</section>
+
+<section id="abstract">
+  <div class="wrap col">
+    <details class="abstract">
+    <summary>Abstract</summary>
+    <div class="body">
+    <p>Humans typically rely on vision, touch, hearing, and proprioception to perceive contact and adapt their actions during manipulation. Providing robots with comparable responsiveness therefore requires hardware that can retain and use these complementary sensory signals. Most imitation-learning systems, however, observe demonstrations primarily through vision and proprioception, limiting access to contact information that is difficult to infer visually. <br>
+      We present <b>PolyUMI</b>, an open-source platform for scalable visual--tactile--audio demonstration collection and robot deployment. Its lightweight, wireless handheld gripper records synchronized wrist-camera, optical tactile, contact-audio, and proprioceptive observations without requiring a tethered workstation. The same sensing finger can be transferred to the robot end effector, preserving the sensing geometry between demonstration collection and policy execution. <br>
+      To effectively use these heterogeneous observations, we further introduce <b>VisTA</b>, a token-level multimodal policy that integrates information across sensors and time to predict contact-aware robot actions. Experiments spanning object inference, slip control, and contact-rich manipulation show that touch and audio reveal task-relevant information beyond vision and that VisTA is competitive with or outperforms existing multimodal policies.<br>
+       Together, PolyUMI and VisTA provide an accessible pipeline for collecting multimodal demonstrations and learning policies that perceive physical interaction beyond vision. </p>
+    </div>
+    </details>
+  </div>
+</section>
+
+<section id="system">
+  <div class="wrap">
+    <div class="sec-head col">
+      <h2>The system</h2>
+      <p class="lede">A handheld gripper for collecting demonstrations and a robot end-effector for executing policies — built around one sensing finger that moves between them in about ten minutes.</p>
+    </div>
+
+  </div>
+
+  <!-- System overview figure. It sits in .wrap-wide (1340px) rather than the
+       1120px body column so it reads slightly larger than the rest; change the
+       class to "wrap" to bring it back in line with everything else. -->
+  <div class="wrap-wide" style="margin-bottom:56px">
+    <figure>
+      <img src="assets/system.jpg" alt="Three panels. Left: the same scene seen by the wrist fisheye camera, the tactile camera and the contact microphone's spectrogram. Centre: the handheld gripper with labelled 177-degree fisheye camera, onboard compute and button-LED interface, conformant tactile surface and camera, piezo microphone and earbuds for live audio feedback. Right: the sensing finger mounted on a modified Franka Hand on a Franka Research 3 arm." width="3000" height="849">
+      <figcaption style="text-align:left; max-width:none; margin-left:0">
+        <b>Left:</b> the same scene through different sensors. The tactile camera sees the screwdriver through the sensing surface and the lightbulb through peripheral vision, while the wrist camera sees the bulb directly and the screwdriver is mostly occluded by the fingers. Contact events appear as spikes in the audio spectrogram and are heard live through headphones. <b>Centre and right:</b> the handheld gripper and the robot end-effector share the same tactile finger and task-oriented geometry.
+      </figcaption>
+    </figure>
+  </div>
+  <div class="wrap">
+
+    <!-- The transfer clip is portrait, so it is capped by height rather than
+         width (--transfer-h) and the facts column takes the wider share. -->
+    <div class="split transfer-pair">
+      <figure class="fig-card">
+        <video controls preload="metadata" playsinline muted loop poster="assets/poster-transfer.jpg">
+          <source src="assets/PolyTouch_finger_transfer.mp4" type="video/mp4">
+          <a href="assets/PolyTouch_finger_transfer.mp4">Download the finger transfer clip</a>.
+        </video>
+        <figcaption>The same sensing finger moving between the handheld gripper and the robot hand.</figcaption>
+      </figure>
+
+      <ul class="facts stacked">
+        <li><span class="num">$236</span><span class="lbl">Sensing finger in parts, about $240 and four hours on top of a standard UMI gripper</span></li>
+        <li><span class="num">4</span><span class="lbl">Synchronized streams: wrist vision, optical tactile, contact audio, proprioception</span></li>
+        <li><span class="num">~10 min</span><span class="lbl">To move the finger between the handheld device and the robot hand</span></li>
+      </ul>
+    </div>
+
+    <div class="split split-wide" style="margin-top:56px">
+      <div>
+        <h3>Sensor modalities</h3>
+        <p style="font-size:16px">The finger pairs an optical tactile sensor with a contact microphone in one module. An internal camera watches a deformable reflective surface through a curved mirror, giving a near-overhead view of a large contact region; the surface is seven layers of VHB tape coated in aluminium powder and sealed with medical tape. Dynamic lighting compensation keeps it usable across environments, which matters for in-the-wild collection.</p>
+        <div class="tbl-scroll" style="margin-top:22px">
+          <table>
+            <thead><tr><th>Modality</th><th>Sensor</th><th>Output</th></tr></thead>
+            <tbody>
+              <tr><td><span class="chip" style="border:0;padding:0"><span class="dot d-t"></span>Tactile</span></td><td>Optical finger</td><td class="num">20 fps, 1152 × 648 MJPEG</td></tr>
+              <tr><td><span class="chip" style="border:0;padding:0"><span class="dot d-a"></span>Audio</span></td><td>Contact mic</td><td class="num">16 kHz mono PCM</td></tr>
+              <tr><td><span class="chip" style="border:0;padding:0"><span class="dot d-v"></span>Vision</span></td><td>GoPro Hero 12 + fisheye</td><td class="num">60 fps, 1920 × 1080 MP4</td></tr>
+              <tr><td>Proprioception</td><td>SLAM / ArUco</td><td class="num">6-DoF pose + gripper width</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <h3>Cost and build time</h3>
+        <p style="font-size:16px">The design uses modular components and minimal software dependencies, so the setup effort to deploy the system stays low.</p>
+        <div class="tbl-scroll" style="margin-top:22px">
+          <table style="min-width:0">
+            <thead><tr><th>Component</th><th class="num">Hardware</th><th class="num">Assembly</th></tr></thead>
+            <tbody>
+              <tr><td>Robot end-effector</td><td class="num">$742.48</td><td class="num">30 min</td></tr>
+              <tr><td>Handheld UMI gripper</td><td class="num">$700.27</td><td class="num">2 h</td></tr>
+              <tr class="ours"><td>Multimodal sensing finger</td><td class="num">$235.96</td><td class="num">4 h</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:56px">
+      <h3>Compared with other demonstration interfaces</h3>
+      <p style="font-size:16px; margin-bottom:22px">PolyUMI is the only handheld interface that collects synchronized vision, touch and contact audio — and it adds live audio monitoring, so the demonstrator hears contact while recording.</p>
+      <div class="tbl-scroll">
+        <table class="compact">
+          <thead>
+            <tr>
+              <th>Method</th><th>Vision</th><th>Tactile</th><th>Audio</th>
+              <th>Open source</th><th>Cable free</th><th>Live feedback</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>UMI</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td></tr>
+            <tr><td>FastUMI</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td></tr>
+            <tr><td>ViTaMin</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td><td class="yes">✓</td><td class="no">✗</td></tr>
+            <tr><td>Actuated UMI</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td></tr>
+            <tr><td>ManiWAV</td><td class="yes">✓</td><td class="no">✗</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td></tr>
+            <tr><td>TacThru</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td><td class="yes">✓</td><td class="no">✗</td><td class="no">✗</td></tr>
+            <tr><td>Touch in the Wild</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">✗</td><td class="yes">✓</td><td class="no">✗</td><td class="yes">✓</td></tr>
+            <tr class="ours"><td>PolyUMI (ours)</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="vista">
+  <div class="wrap">
+    <div class="sec-head col">
+      <h2>VisTA</h2>
+      <p class="lede">A token-level fusion policy. Instead of pooling one feature per sensor, VisTA keeps local tactile deformation, short auditory events and visual scene structure as separate tokens and lets attention mix them across sensors, space and time.</p>
+    </div>
+
+    <figure class="fig-card">
+      <img src="assets/vista-model.png" alt="VisTA architecture: vision, tactile and audio streams each pass through a CNN encoder and the robot state through an MLP, producing modality-specific token sets that are fused into a single conditioning sequence for a flow-matching transformer that outputs an action chunk." width="1182" height="542">
+      <figcaption>Sensor-specific CNN encoders produce 294 tokens in total, which a joint eight-layer transformer refines by bidirectional self-attention. The fused tokens <span class="num" style="font-family:var(--mono)">C</span> condition an 18-layer DiT-style action model trained with conditional flow matching.</figcaption>
+    </figure>
+
+    <div class="split" style="margin-top:44px">
+      <div>
+        <h3>Observations</h3>
+        <p style="font-size:16px">Wrist camera and tactile images over a history of two timesteps, each resized to 224 × 224 and encoded to 98 tokens. Contact audio becomes a log-Mel spectrogram over roughly the last half second, encoded to 96 tokens. The robot state goes through an MLP. Modality-specific spatial embeddings and shared temporal embeddings keep the origin and time index of every token.</p>
+      </div>
+      <div>
+        <h3>Actions</h3>
+        <p style="font-size:16px">The policy predicts a chunk of 16 actions, each a 3D translation, a 6D rotation and a relative gripper-width command, expressed relative to the current end-effector pose. On the arm, 10 Hz commands are interpolated into joint torques at 1 kHz by a Cartesian impedance controller for compliant manipulation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="results">
+  <div class="wrap">
+    <div class="sec-head col">
+      <h2>Experiments</h2>
+      <p class="lede">Three questions. Do touch and audio expose object properties that vision misses? Do they give precise enough feedback for closed-loop slip control? And do they improve full manipulation behaviours?</p>
+    </div>
+
+    <!-- 1 -->
+    <div class="result" id="shape-recognition">
+      <ul class="chips">
+        <li class="chip"><span class="dot d-t"></span>Tactile</li>
+      </ul>
+      <h3>Tactile Shape Recognition</h3>
+      <p class="headline-stat">92.3% accuracy across five surface patterns</p>
+      <p style="font-size:16px">Fine surface geometry is hard to recover visually during manipulation: the contact region is occluded by the gripper and the features are smaller than an external camera can resolve. A CNN classifier trained on single tactile images separates five 3D-printed patterns, with scenes split between training and test so no scene appears in both.</p>
+      <div class="split shape-pair">
+        <figure class="fig-card">
+          <img src="assets/tactile-shapes.png" alt="Five iridescent tactile images showing the deformation signature of flat, square, circle, triangle and letter-N patterns." width="964" height="356">
+          <figcaption>What the finger sees: flat, square, circle, triangle and the letter N.</figcaption>
+        </figure>
+        <figure class="fig-card">
+          <img src="assets/shape-confusion.png" alt="Confusion matrix for tactile shape classification, with diagonal values of 90, 99, 91, 84 and 97 percent." width="1255" height="644">
+          <figcaption>Confusion matrix over the five classes.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- 2 -->
+    <div class="result" id="object-in-box">
+      <ul class="chips">
+        <li class="chip"><span class="dot d-a"></span>Audio</li>
+      </ul>
+      <h3>Object-in-Box Classification</h3>
+      <p class="headline-stat">44% without audio → ~80% with it</p>
+      <p style="font-size:16px">The robot shakes a closed box containing gears, thin screws or thick screws and classifies the contents. Vision-only (44%), tactile-only (44%) and visual–tactile (42%) models land barely above the 33% chance rate. Adding contact audio lifts every sensor configuration to around 80%, with the tactile–audio models classifying thick screws perfectly — from only 20 training demonstrations per class.</p>
+      <div class="stack">
+        <figure class="fig-card cap-h">
+          <video controls preload="metadata" playsinline muted loop poster="assets/poster-shaking.jpg">
+            <source src="assets/polyumi_shaking_1.mp4" type="video/mp4">
+            <a href="assets/polyumi_shaking_1.mp4">Download the shaking clip</a>.
+          </video>
+          <figcaption>The shaking motion: 20 oscillations along a sinusoidal trajectory, 10 cm amplitude, 0.15 s period.</figcaption>
+        </figure>
+        <figure class="fig-card">
+          <img src="assets/shake-setup.png" alt="Left: three audio spectrograms produced by shaking gears, thin screws and thick screws. Middle: photographs of the three object classes in the yellow box. Right: the box held by the robot gripper with a double-headed arrow showing the shaking motion." width="1005" height="431">
+          <figcaption>The robot shakes the box through 20 oscillations. Each object class produces a distinct collision signature, visible in the spectrograms on the left.</figcaption>
+        </figure>
+        <figure class="fig-card">
+          <img src="assets/audio-confusion.png" alt="Prediction distributions for object-in-box classification across seven sensor configurations. Configurations including audio reach around 80 percent accuracy; those without stay near 44 percent." width="2000" height="709">
+          <figcaption>Prediction distributions per sensor configuration, aggregated over three random seeds. Green outlines mark correct predictions. V is wrist vision, T is optical tactile, A is contact audio.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- 3 -->
+    <div class="result">
+      <ul class="chips">
+        <li class="chip"><span class="dot d-t"></span>Tactile</li>
+        <li class="chip"><span class="dot d-a"></span>Audio</li>
+      </ul>
+      <h3>Closed-Loop Slip Control</h3>
+      <p class="headline-stat">8/10 with touch and audio, 2/10 with vision alone</p>
+      <p style="font-size:16px">The robot holds a screwdriver horizontally and must let it rotate to vertical by modulating grip force, without dropping it. Tighten too early and the screwdriver never reaches the target; react too late and it slips out. Doing this by teleoperation without haptic feedback is very hard, which is why the handheld platform matters for collecting the demonstrations at all.</p>
+      <figure class="fig-card cap-h" style="margin-top:26px">
+        <video controls preload="metadata" playsinline muted loop poster="assets/poster-slip.jpg">
+          <source src="assets/Slip_control_w6x.mp4" type="video/mp4">
+          <a href="assets/Slip_control_w6x.mp4">Download the slip control clip</a>.
+        </video>
+        <figcaption>A successful rollout: the policy lets the screwdriver rotate under gravity, then tightens to catch it near vertical.</figcaption>
+      </figure>
+
+      <div class="split split-narrow" style="margin-top:24px">
+        <div class="tbl-scroll">
+          <table style="min-width:0">
+            <thead><tr><th>Sensors</th><th class="num">Success rate</th></tr></thead>
+            <tbody>
+              <tr class="ours"><td>V + T + A</td><td class="num">8/10</td></tr>
+              <tr><td>T + A</td><td class="num">7/10</td></tr>
+              <tr><td>V + T</td><td class="num">3/10</td></tr>
+              <tr><td>V + A</td><td class="num">3/10</td></tr>
+              <tr><td>T</td><td class="num">3/10</td></tr>
+              <tr><td>V</td><td class="num">2/10</td></tr>
+              <tr><td>A</td><td class="num">0/10</td></tr>
+            </tbody>
+            <caption>Sensor ablation over 10 trials. Tactile and audio together enable slip control where other combinations fail.</caption>
+          </table>
+        </div>
+
+        <figure class="fig-card">
+          <img src="assets/slip-setup.png" alt="Side view of the slip control task: the gripper holds a screwdriver which rotates from horizontal at the start, through the slip, to caught at vertical." width="432" height="319">
+          <figcaption>Start, slip, catch — the screwdriver must end within 10° of vertical, still in the gripper.</figcaption>
+        </figure>
+      </div>
+    </div>
+
+    <!-- 4 -->
+    <div class="result" id="manipulation">
+      <ul class="chips">
+        <li class="chip"><span class="dot d-v"></span>Vision</li>
+        <li class="chip"><span class="dot d-t"></span>Tactile</li>
+        <li class="chip"><span class="dot d-a"></span>Audio</li>
+      </ul>
+      <h3>Contact-Rich Manipulation</h3>
+      <p style="font-size:16px">Two tasks with different demands. <b>Board wiping</b> needs sustained contact along a visually defined line: too little contact leaves the line unerased, deviation from the line gives only partial completion. <b>Lightbulb turning</b> chains alignment, insertion and rotational engagement — the robot must seat a loosely inserted bulb until it switches on.</p>
+      <!-- Successful VisTA rollouts. The board-wiping clip is 16:9 and the
+           lightbulb clip is portrait (cropped at the bottom to 576×780), so the
+           columns are weighted 2.3 : 1 to bring both players to roughly the same
+           rendered height. If either clip is re-exported at a different aspect,
+           adjust --roll-ratio below. -->
+      <div class="split rollout-pair" style="margin-bottom:28px">
+        <figure class="fig-card">
+          <video controls preload="metadata" playsinline muted loop poster="assets/poster-boardwiping.jpg">
+            <source src="assets/polyumi_board_wiping_1.mp4" type="video/mp4">
+            <a href="assets/polyumi_board_wiping_1.mp4">Download the board wiping clip</a>.
+          </video>
+          <figcaption>Board wiping: a successful rollout, line fully erased.</figcaption>
+        </figure>
+        <figure class="fig-card">
+          <video controls preload="metadata" playsinline muted loop poster="assets/poster-lightbulb.jpg">
+            <source src="assets/polyumi_lightbulb.mp4" type="video/mp4">
+            <a href="assets/polyumi_lightbulb.mp4">Download the lightbulb clip</a>.
+          </video>
+          <figcaption>Lightbulb turning: the bulb seats and switches on.</figcaption>
+        </figure>
+      </div>
+      <figure class="fig-card">
+        <img src="assets/success-rates.png" alt="Grouped bar chart of success rates. On board wiping VisTA reaches 75 percent full success and 100 percent including partial, ahead of PolyTouch, Sparsh-X, MULSA and a vision-only diffusion policy. On lightbulb turning all methods exceed 80 percent." width="2000" height="692">
+        <figcaption>Hatched regions are partial successes. On board wiping, the vision-only diffusion policy and MulSA frequently lose contact and Sparsh-X drifts off the line, while VisTA establishes contact, keeps it, and follows the line closely enough to erase it completely. On lightbulb turning every method clears 80% — the bulb state is a clear visual cue, so contact sensing adds little, and VisTA matches the strongest multimodal baseline without giving up performance.</figcaption>
+      </figure>
+
+    </div>
+  </div>
+</section>
+
+<section id="bibtex">
+  <div class="wrap col">
+    <div class="bib-head">
+      <h2 style="margin:0">BibTeX</h2>
+      <button id="copy" type="button">Copy</button>
+    </div>
+    <pre id="bib">@article{wood2026polyumi,
+  title   = {PolyUMI: Accessible Visual-Tactile-Audio Data Collection
+             for Object Inference and Manipulation},
+  author  = {Wood, Conor and Krohn, Rickmer and Ramaswami, Aravind
+             and Ramaswami, Anunth and Dengler, Nils and Lynch, Kevin M.
+             and Colgate, J. Edward and Chalvatzaki, Georgia
+             and Elwin, Matthew L.},
+  journal = {arXiv preprint arXiv:XXXX.XXXXX},
+  year    = {2026}
+}</pre>
+    <p class="tbl-note">Update the arXiv identifier once the preprint is posted.</p>
+  </div>
+</section>
+
+<div class="totop">
+  <a href="#top">&#8593; Back to top</a>
+</div>
+
+<footer>
+  <div class="wrap foot-grid">
+    <div>
+      <h3>Acknowledgments</h3>
+      <p>We thank Han Zhengxiao for his invaluable advice at the outset of this project, and Toby Buckley and Yutao He for insightful conversations throughout.</p>
+      <p>This research is funded by the German Research Foundation (DFG) Emmy Noether Programme (CH2676/1-1), the EU's Horizon Europe project ARISE (101135959), the German Federal Ministry of Education and Research (BMBF) project “RiG” (16ME1001) and the European Research Council (ERC) project “SIREN” (101163933). The authors gratefully acknowledge the scientific support and HPC resources provided by the Erlangen National High Performance Computing Center (NHR@FAU) of Friedrich-Alexander-Universität Erlangen-Nürnberg.</p>
+      <p style="margin-bottom:0; font-size:13.5px">Content © the authors.</p>
+    </div>
+    <div class="foot-mark">
+      <img src="assets/polyumi-logo.png" alt="PolyUMI logo" width="582" height="710">
+    </div>
+  </div>
+</footer>
+
+<div class="accent-rule bottom" aria-hidden="true"></div>
+
+<script>
+document.getElementById('copy').addEventListener('click', async function () {
+  var btn = this;
+  try {
+    await navigator.clipboard.writeText(document.getElementById('bib').textContent);
+    btn.textContent = 'Copied';
+  } catch (e) {
+    btn.textContent = 'Press ⌘C';
+  }
+  setTimeout(function () { btn.textContent = 'Copy'; }, 1800);
+});
+</script>
+
+</body>
+</html>
