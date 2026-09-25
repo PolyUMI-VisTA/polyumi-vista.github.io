@@ -146,8 +146,6 @@ h1.name{
 .btn.ghost{background:transparent; color:var(--ink); border-color:#c8c0d8}
 .btn.ghost:hover{background:var(--ink); color:#fff; border-color:var(--ink)}
 .btn svg{width:17px; height:17px; flex:none; fill:currentColor}
-.btn[aria-disabled="true"]{opacity:.45; pointer-events:none}
-.pending{font-size:13.5px; color:var(--muted); margin:16px 0 0}
 
 /* ---------- hero ---------- */
 /* HERO SIZE — tune here.
@@ -375,7 +373,7 @@ footer h3{font-size:16px; margin-bottom:8px}
     </div>
 
     <p class="authors">
-      <a href="https://cwoodhayes.github.io">Conor Wood</a><sup><span class="eq">*</span>,1</sup>,
+      <a href="https://cwoodhayes.github.io">Conor W. Hayes</a><sup><span class="eq">*</span>,1</sup>,
       <a href="https://rickmerkrohn.github.io">Rickmer Krohn</a><sup><span class="eq">*</span>,2,3,4</sup>,
       <a href="https://www.linkedin.com/in/aravind-ramaswami-a52656220">Aravind Ramaswami</a><sup>1</sup>,
       <a href="https://www.linkedin.com/in/anunth-ramaswami-81506926b">Anunth Ramaswami</a><sup>1</sup>,<br>
@@ -394,14 +392,12 @@ footer h3{font-size:16px; margin-bottom:8px}
     </p>
 
     <nav class="links" aria-label="Project links">
-      <a class="btn" href="assets/polyumi-paper.pdf">
+      <a class="btn" href="assets/polyumi_manuscript.pdf">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6V2zm8 1.5V8h4.5L14 3.5zM8 11h8v1.6H8V11zm0 3.4h8V16H8v-1.6zm0 3.4h5.5v1.6H8v-1.6z"/></svg>
         Manuscript
       </a>
 
-      <!-- ARXIV: replace href="#" with the abstract URL and delete
-           aria-disabled="true" (plus the "arXiv link goes live" line below). -->
-      <a class="btn" href="#" aria-disabled="true">
+      <a class="btn" href="https://arxiv.org/abs/2609.29760">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h9l5 5v15H6V2zm8 1.5V8h4.5L14 3.5zM8 12h8v1.6H8V12zm0 3.4h8V17H8v-1.6z"/></svg>
         arXiv
       </a>
@@ -422,7 +418,6 @@ footer h3{font-size:16px; margin-bottom:8px}
       </a>
       <a class="btn ghost" href="#bibtex">BibTeX</a>
     </nav>
-    <p class="pending">The arXiv link goes live with the preprint.</p>
 
   </div>
 </header>
@@ -724,17 +719,16 @@ footer h3{font-size:16px; margin-bottom:8px}
       <h2 style="margin:0">BibTeX</h2>
       <button id="copy" type="button">Copy</button>
     </div>
-    <pre id="bib">@article{wood2026polyumi,
+    <pre id="bib">@article{hayes2026polyumi,
   title   = {PolyUMI: Accessible Visual-Tactile-Audio Data Collection
              for Object Inference and Manipulation},
-  author  = {Wood, Conor and Krohn, Rickmer and Ramaswami, Aravind
+  author  = {Hayes, Conor W. and Krohn, Rickmer and Ramaswami, Aravind
              and Ramaswami, Anunth and Dengler, Nils and Lynch, Kevin M.
              and Colgate, J. Edward and Chalvatzaki, Georgia
              and Elwin, Matthew L.},
-  journal = {arXiv preprint arXiv:XXXX.XXXXX},
+  journal = {arXiv preprint arXiv:2609.29760},
   year    = {2026}
 }</pre>
-    <p class="tbl-note">Update the arXiv identifier once the preprint is posted.</p>
   </div>
 </section>
 
@@ -747,6 +741,7 @@ footer h3{font-size:16px; margin-bottom:8px}
     <div>
       <h3>Acknowledgments</h3>
       <p>We thank Han Zhengxiao for his invaluable advice at the outset of this project, and Toby Buckley and Yutao He for insightful conversations throughout.</p>
+      <p>This work builds on <a href="https://umi-gripper.github.io">UMI</a> and <a href="https://polytouch.alanz.info">PolyTouch</a>. We thank the authors for their foundational work.</p>
       <p>This research is funded by the German Research Foundation (DFG) Emmy Noether Programme (CH2676/1-1), the EU's Horizon Europe project ARISE (101135959), the German Federal Ministry of Education and Research (BMBF) project “RiG” (16ME1001) and the European Research Council (ERC) project “SIREN” (101163933). The authors gratefully acknowledge the scientific support and HPC resources provided by the Erlangen National High Performance Computing Center (NHR@FAU) of Friedrich-Alexander-Universität Erlangen-Nürnberg.</p>
       <p style="margin-bottom:0; font-size:13.5px">Content © the authors.</p>
     </div>

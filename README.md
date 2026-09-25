@@ -55,10 +55,6 @@ macOS or Windows.
 
 ## Before going live
 
-- `index.html`: the arXiv button is `href="#"` with `aria-disabled="true"`.
-  Replace the href with the abstract URL and drop the `aria-disabled`
-  attribute plus the "The arXiv link goes live with the preprint." line.
-- `index.html`: replace `arXiv:XXXX.XXXXX` in the BibTeX block.
 - Confirm the repo URL `https://github.com/polyumi/PolyUMI-platform` is correct
   (it appears in the nav, the button row and the footer).
 
@@ -83,7 +79,7 @@ macOS or Windows.
 | `assets/polyumi_lightbulb.mp4` | rotation baked in, cropped at the bottom to 576×780, audio stripped |
 | `assets/poster-boardwiping.jpg`, `assets/poster-lightbulb.jpg` | poster frames at 1 s |
 | `assets/video-poster.jpg` | frame at 4 s of the video |
-| `assets/polyumi-paper.pdf` | `PolyUMI_Manuscript_0.pdf` |
+| `assets/polyumi_manuscript.pdf` | `PolyUMI_Manuscript_0.pdf` |
 | `assets/polyumi-logo.png` | `polyumi_logo_4.png`, unchanged |
 | `assets/logo.svg` | mark redrawn from the logo as vector, transparent background |
 | `assets/apple-touch-icon.png` | 180 px icon from the logo |
