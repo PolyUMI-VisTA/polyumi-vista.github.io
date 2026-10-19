@@ -3,6 +3,16 @@
 Static project page for *PolyUMI: Accessible Visual–Tactile–Audio Data Collection
 for Object Inference and Manipulation*.
 
+## Serving locally
+
+From the repository root, start Python's built-in static server:
+
+```sh
+python3 -m http.server 8000
+```
+
+Then open <http://localhost:8000/> in a browser. Stop the server with `Ctrl-C`.
+
 ## Deploying to GitHub Pages
 
 1. Copy `index.html`, `assets/` and `.nojekyll` into the repository you want to
